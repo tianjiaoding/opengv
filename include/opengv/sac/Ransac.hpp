@@ -73,6 +73,7 @@ public:
   using SampleConsensus<problem_t>::model_coefficients_;
   using SampleConsensus<problem_t>::inliers_;
   using SampleConsensus<problem_t>::probability_;
+  using SampleConsensus<problem_t>::max_time_;
 
   /**
    * \brief Constructor.
@@ -80,7 +81,8 @@ public:
   Ransac(
       int maxIterations = 1000,
       double threshold = 1.0,
-      double probability = 0.99 );
+      double probability = 0.99,
+      double maxTime = 1.0 );
   /**
    * \brief Destructor.
    */

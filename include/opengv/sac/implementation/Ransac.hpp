@@ -32,8 +32,8 @@
 
 template<typename P>
 opengv::sac::Ransac<P>::Ransac(
-    int maxIterations, double threshold, double probability) :
-    SampleConsensus<P>(maxIterations, threshold, probability)
+    int maxIterations, double threshold, double probability, double maxTime) :
+    SampleConsensus<P>(maxIterations, threshold, probability, maxTime)
 {}
 
 template<typename P>
@@ -52,6 +52,10 @@ opengv::sac::Ransac<PROBLEM_T>::computeModel(
   int n_best_inliers_count = -INT_MAX;
   double k = 1.0;
 
+  auto t_start = std::chrono::high_resolution_clock::now();
+  auto t_end = t_start;
+  std::chrono::duration<double> elapsed = t_start - t_end;
+
   std::vector<int> selection;
   model_t model_coefficients;
 
@@ -62,7 +66,7 @@ opengv::sac::Ransac<PROBLEM_T>::computeModel(
   const unsigned max_skip = max_iterations_ * 10;
 
   // Iterate
-  while( iterations_ < k && skipped_count < max_skip )
+  while( iterations_ < k && skipped_count < max_skip && elapsed.count() < max_time_ )
   {
     // Get X samples which satisfy the model criteria
     sac_model_->getSamples( iterations_, selection );
@@ -126,6 +130,12 @@ opengv::sac::Ransac<PROBLEM_T>::computeModel(
     }
   }
 
+  if(elapsed.count() > max_time_ )
+  {
+      if(debug_verbosity_level > 0)
+          fprintf(stdout,
+                  "[sm::RandomSampleConsensus::computeModel] RANSAC reached the maximum running time.\n");
+  }
   if(debug_verbosity_level > 0)
     fprintf(stdout,
         "[sm::RandomSampleConsensus::computeModel] Model: %zu size, %d inliers.\n",

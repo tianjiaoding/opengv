@@ -78,7 +78,8 @@ public:
   SampleConsensus(
       int maxIterations = 1000,
       double threshold = 1.0,
-      double probability = 0.99 );
+      double probability = 0.99,
+      double maxTime = 1.0 );
   /**
    * \brief Destructor
    */
@@ -103,6 +104,8 @@ public:
   double threshold_;
   /** the current probability (defines remaining iterations) */
   double probability_;
+  /** the maximum running time */
+  double max_time_;
   /** the currently best model coefficients */
   model_t model_coefficients_;
   /** the indices for the currently best hypothesis */

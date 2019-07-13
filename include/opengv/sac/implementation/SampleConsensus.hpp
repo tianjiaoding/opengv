@@ -32,10 +32,11 @@
 
 template<typename P>
 opengv::sac::SampleConsensus<P>::SampleConsensus(
-    int maxIterations, double threshold, double probability) :
+    int maxIterations, double threshold, double probability, double maxTime) :
     max_iterations_(maxIterations),
     threshold_(threshold),
-    probability_(probability)
+    probability_(probability),
+    max_time_(maxTime)
 {}
 
 template<typename P>
