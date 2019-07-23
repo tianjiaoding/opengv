@@ -138,6 +138,10 @@ typedef Eigen::Vector3d
 typedef Eigen::Matrix3d
     eigenvectors_t;
 
+/** A 27xN design matrix containing the trilinear embeddings.
+ */
+    typedef Eigen::Matrix<double, 27, Eigen::Dynamic> trifocal_design_t;
+
 /** EigensolverOutput holds the output-parameters of the eigensolver-algorithm
  *  (described in [11])
  */

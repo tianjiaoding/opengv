@@ -28,15 +28,16 @@
  * SUCH DAMAGE.                                                               *
  ******************************************************************************/
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include <iostream>
 #include <iomanip>
-#include <limits.h>
+#include <climits>
 #include <Eigen/Eigen>
 #include <opengv/relative_pose/methods.hpp>
 #include <opengv/relative_pose/CentralRelativeAdapter.hpp>
 #include <opengv/sac/Ransac.hpp>
+#include <opengv/sac/prosac.h>
 #include <opengv/sac/Lmeds.hpp>
 #include <opengv/sac_problems/relative_pose/CentralRelativePoseSacProblem.hpp>
 #include <opengv/relative_pose/NoncentralRelativeMultiAdapter.hpp>
@@ -142,6 +143,37 @@ int main( int argc, char** argv )
   for(size_t i = 0; i < ransac.inliers_.size(); i++)
     std::cout << ransac.inliers_[i] << " ";
   std::cout << std::endl << std::endl;
+
+  //Create prosac
+  //Set algorithm to NISTER, STEWENIUS, SEVENPT, or EIGHTPT
+  sac::ProgressiveSampleConsensus<
+          sac_problems::relative_pose::CentralRelativePoseSacProblem> prosac;
+  prosac.sac_model_ = relposeproblem_ptr;
+  prosac.threshold_ = 2.0 * (1.0 - cos(atan(sqrt(2.0) * 0.5 / 800.0)));
+  prosac.max_iterations_ = 50;
+
+  //Run the experiment
+  gettimeofday(&tic, 0);
+  prosac.computeModel();
+  gettimeofday(&toc, 0);
+  double prosac_time = TIMETODOUBLE(timeval_minus(toc, tic));
+
+  //print results for prosac 1
+  std::cout << "the prosac threshold is: " << prosac.threshold_ << std::endl;
+  std::cout << "the prosac results is: " << std::endl;
+  std::cout << prosac.model_coefficients_ << std::endl << std::endl;
+  std::cout << "the normalized translation is: " << std::endl;
+  std::cout << prosac.model_coefficients_.col(3) /
+               prosac.model_coefficients_.col(3).norm() << std::endl << std::endl;
+  std::cout << "Prosac needed " << prosac.iterations_ << " iterations and ";
+  std::cout << prosac_time << " seconds" << std::endl << std::endl;
+  std::cout << "the number of inliers is: " << prosac.inliers_.size();
+  std::cout << std::endl << std::endl;
+  std::cout << "the found inliers are: " << std::endl;
+  for (size_t i = 0; i < prosac.inliers_.size(); i++)
+    std::cout << prosac.inliers_[i] << " ";
+  std::cout << std::endl << std::endl;
+
 
   // Create Lmeds
   sac::Lmeds<

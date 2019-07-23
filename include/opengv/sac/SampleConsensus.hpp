@@ -95,8 +95,9 @@ public:
 
   // \todo accessors
   //private:
-  
-  /** the maximum number of iterations */
+
+
+    /** the maximum number of iterations */
   int max_iterations_;
   /** the current number of iterations */
   int iterations_;

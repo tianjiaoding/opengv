@@ -55,7 +55,10 @@ ENDIF()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/modules/")
 find_package(Eigen REQUIRED)
-set(ADDITIONAL_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIR}/unsupported)
+find_package(Boost REQUIRED)
+set(ADDITIONAL_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIR}/unsupported
+        ${Boost_INCLUDE_DIRS})
+
 
 set( OPENGV_SOURCE_FILES
   src/absolute_pose/modules/main.cpp
@@ -174,7 +177,7 @@ set( OPENGV_HEADER_FILES
   include/opengv/relative_pose/MACentralRelative.hpp
   include/opengv/relative_pose/MANoncentralRelative.hpp
   include/opengv/relative_pose/MANoncentralRelativeMulti.hpp
-  include/opengv/point_cloud/MAPointCloud.hpp )
+        include/opengv/point_cloud/MAPointCloud.hpp include/opengv/trifocal/methods.hpp)
 
 add_library( opengv ${OPENGV_SOURCE_FILES} ${OPENGV_HEADER_FILES} )
 add_library( random_generators test/random_generators.cpp test/random_generators.hpp test/experiment_helpers.cpp test/experiment_helpers.hpp test/time_measurement.cpp test/time_measurement.hpp )
