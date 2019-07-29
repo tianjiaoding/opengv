@@ -60,9 +60,6 @@ namespace opengv {
             /** The model we trying to fit */
             typedef typename problem_t::model_t model_t;
 
-//      using Ptr = boost::shared_ptr<ProgressiveSampleConsensus>;
-//      using ConstPtr = boost::shared_ptr<const ProgressiveSampleConsensus>;
-
             using SampleConsensus<problem_t>::max_iterations_;
             using SampleConsensus<problem_t>::threshold_;
             using SampleConsensus<problem_t>::iterations_;
@@ -95,6 +92,6 @@ namespace opengv {
     }
 }
 
-#include "implementation/prosac.hpp"
+#include "opengv/sac/implementation/Prosac.hpp"
 
 #endif /* OPENGV_SAC_PROSAC_HPP_ */

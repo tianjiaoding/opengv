@@ -440,10 +440,10 @@ opengv::generateRandom2D2DCorrespondences(
 
     //project this point into the corresponding camera in viewpoint 2
     //and use as outlier
-    bearingVectors2[i] = camRotation.transpose()*(bodyPoint - camOffset);
+    bearingVectors2[gt.cols()-i-1] = camRotation.transpose()*(bodyPoint - camOffset);
 
     //normalize the bearing vector
-    bearingVectors2[i] = bearingVectors2[i] / bearingVectors2[i].norm();
+    bearingVectors2[gt.cols()-i-1] = bearingVectors2[gt.cols()-i-1] / bearingVectors2[gt.cols()-i-1].norm();
   }
 }
 

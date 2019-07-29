@@ -40,6 +40,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <Eigen/Eigen>
+#include <Eigen/CXX11/Tensor>
 #include <Eigen/src/Core/util/DisableStupidWarnings.h>
 
 /**
@@ -118,7 +119,14 @@ typedef Eigen::Matrix3cd
 typedef std::vector< complexEssential_t, Eigen::aligned_allocator< complexEssential_t> >
     complexEssentials_t;
 
-/** A 3-vector describing a point in 3D-space */
+//typedef Eigen::TensorFixedSize<float, Eigen::Sizes<3, 3, 3>>
+//    trifocalTensor_t;
+typedef Eigen::Matrix<double, 27, 1> trifocalTensor_t;
+
+typedef Eigen::Matrix3d trifocalSlice_t;
+
+
+    /** A 3-vector describing a point in 3D-space */
 typedef Eigen::Vector3d
     point_t;
 
@@ -140,7 +148,17 @@ typedef Eigen::Matrix3d
 
 /** A 27xN design matrix containing the trilinear embeddings.
  */
-    typedef Eigen::Matrix<double, 27, Eigen::Dynamic> trifocal_design_t;
+typedef Eigen::Matrix<double, 27, Eigen::Dynamic> trifocal_design_t;
+
+/** An incremental model for three view relative pose.
+ */
+typedef struct TrifocalModel
+{
+  trifocalTensor_t t;
+  trifocalTensor_t t_corrected;
+  transformation_t trans12;
+  transformation_t trans13;
+} trifocalModel_t;
 
 /** EigensolverOutput holds the output-parameters of the eigensolver-algorithm
  *  (described in [11])

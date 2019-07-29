@@ -133,7 +133,7 @@ set( OPENGV_SOURCE_FILES
   src/relative_pose/MACentralRelative.cpp
   src/relative_pose/MANoncentralRelative.cpp
   src/relative_pose/MANoncentralRelativeMulti.cpp
-  src/point_cloud/MAPointCloud.cpp )
+  src/point_cloud/MAPointCloud.cpp src/trifocal/methods.cpp src/trifocal/TrifocalSacProblem.cpp)
 
 set( OPENGV_HEADER_FILES
   include/opengv/types.hpp
@@ -177,14 +177,14 @@ set( OPENGV_HEADER_FILES
   include/opengv/relative_pose/MACentralRelative.hpp
   include/opengv/relative_pose/MANoncentralRelative.hpp
   include/opengv/relative_pose/MANoncentralRelativeMulti.hpp
-        include/opengv/point_cloud/MAPointCloud.hpp include/opengv/trifocal/methods.hpp)
+        include/opengv/point_cloud/MAPointCloud.hpp include/opengv/trifocal/methods.hpp include/opengv/trifocal/TrifocalSacProblem.hpp)
 
 add_library( opengv ${OPENGV_SOURCE_FILES} ${OPENGV_HEADER_FILES} )
 add_library( random_generators test/random_generators.cpp test/random_generators.hpp test/experiment_helpers.cpp test/experiment_helpers.hpp test/time_measurement.cpp test/time_measurement.hpp )
 set_target_properties( opengv random_generators PROPERTIES
                     SOVERSION ${PROJECT_VERSION}
                     VERSION ${PROJECT_VERSION}
-                    CXX_STANDARD 11
+                    CXX_STANDARD 14
                     CXX_STANDARD_REQUIRED ON
                     DEBUG_POSTFIX d )
 
@@ -311,6 +311,12 @@ IF (BUILD_TESTS)
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND test_Sturm)
 
+  add_executable( test_trifocal test/test_trifocal.cpp )
+  target_link_libraries( test_trifocal opengv random_generators )
+  add_test(NAME test_trifocal
+          WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+          COMMAND test_trifocal)
+
   set_target_properties(
     test_absolute_pose
     test_absolute_pose_sac
@@ -330,9 +336,10 @@ IF (BUILD_TESTS)
     test_point_cloud
     test_point_cloud_sac
     test_Sturm
+    test_trifocal
 
     PROPERTIES
-    CXX_STANDARD 11
+    CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
     DEBUG_POSTFIX d )
 

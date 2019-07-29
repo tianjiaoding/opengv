@@ -43,6 +43,7 @@
 #include <opengv/relative_pose/NoncentralRelativeMultiAdapter.hpp>
 #include <opengv/sac/MultiRansac.hpp>
 #include <opengv/sac_problems/relative_pose/MultiNoncentralRelativePoseSacProblem.hpp>
+#include <opengv/trifocal/methods.hpp>
 #include <sstream>
 #include <fstream>
 
@@ -63,7 +64,7 @@ int main( int argc, char** argv )
   //set experiment parameters
   double noise = 0.5;
   double outlierFraction = 0.4;
-  size_t numberPoints = 200;
+  size_t numberPoints = 3;
 
   //generate a random pose for viewpoint 1
   translation_t position1 = Eigen::Vector3d::Zero();
@@ -107,99 +108,14 @@ int main( int argc, char** argv )
       bearingVectors2,
       rotation);
 
-  //Create a RelativePoseSac problem and Ransac
-  //Set algorithm to NISTER, STEWENIUS, SEVENPT, or EIGHTPT
-  sac::Ransac<
-      sac_problems::relative_pose::CentralRelativePoseSacProblem> ransac;
-  std::shared_ptr<
-      sac_problems::relative_pose::CentralRelativePoseSacProblem> relposeproblem_ptr(
-      new sac_problems::relative_pose::CentralRelativePoseSacProblem(
-      adapter,
-      sac_problems::relative_pose::CentralRelativePoseSacProblem::STEWENIUS));
-  ransac.sac_model_ = relposeproblem_ptr;
-  ransac.threshold_ = 2.0*(1.0 - cos(atan(sqrt(2.0)*0.5/800.0)));
-  ransac.max_iterations_ = 50;
-
-  //Run the experiment
-  struct timeval tic;
-  struct timeval toc;
-  gettimeofday( &tic, 0 );
-  ransac.computeModel();
-  gettimeofday( &toc, 0 );
-  double ransac_time = TIMETODOUBLE(timeval_minus(toc,tic));
-
-  //print results for ransac 1
-  std::cout << "the ransac threshold is: " << ransac.threshold_ << std::endl;
-  std::cout << "the ransac results is: " << std::endl;
-  std::cout << ransac.model_coefficients_ << std::endl << std::endl;
-  std::cout << "the normalized translation is: " << std::endl;
-  std::cout << ransac.model_coefficients_.col(3)/
-      ransac.model_coefficients_.col(3).norm() << std::endl << std::endl;
-  std::cout << "Ransac needed " << ransac.iterations_ << " iterations and ";
-  std::cout << ransac_time << " seconds" << std::endl << std::endl;
-  std::cout << "the number of inliers is: " << ransac.inliers_.size();
-  std::cout << std::endl << std::endl;
-  std::cout << "the found inliers are: " << std::endl;
-  for(size_t i = 0; i < ransac.inliers_.size(); i++)
-    std::cout << ransac.inliers_[i] << " ";
-  std::cout << std::endl << std::endl;
-
-  //Create prosac
-  sac::ProgressiveSampleConsensus<
-          sac_problems::relative_pose::CentralRelativePoseSacProblem> prosac;
-  prosac.sac_model_ = relposeproblem_ptr;
-  prosac.threshold_ = 2.0 * (1.0 - cos(atan(sqrt(2.0) * 0.5 / 800.0)));
-  prosac.max_iterations_ = 50;
-
-  //Run the experiment
-  gettimeofday(&tic, 0);
-  prosac.computeModel();
-  gettimeofday(&toc, 0);
-  double prosac_time = TIMETODOUBLE(timeval_minus(toc, tic));
-
-  //print results for prosac 1
-  std::cout << "the prosac threshold is: " << prosac.threshold_ << std::endl;
-  std::cout << "the prosac results is: " << std::endl;
-  std::cout << prosac.model_coefficients_ << std::endl << std::endl;
-  std::cout << "the normalized translation is: " << std::endl;
-  std::cout << prosac.model_coefficients_.col(3) /
-               prosac.model_coefficients_.col(3).norm() << std::endl << std::endl;
-  std::cout << "Prosac needed " << prosac.iterations_ << " iterations and ";
-  std::cout << prosac_time << " seconds" << std::endl << std::endl;
-  std::cout << "the number of inliers is: " << prosac.inliers_.size();
-  std::cout << std::endl << std::endl;
-  std::cout << "the found inliers are: " << std::endl;
-  for (size_t i = 0; i < prosac.inliers_.size(); i++)
-    std::cout << prosac.inliers_[i] << " ";
-  std::cout << std::endl << std::endl;
-
-
-  // Create Lmeds
-  sac::Lmeds<
-      sac_problems::relative_pose::CentralRelativePoseSacProblem> lmeds;
-  lmeds.sac_model_ = relposeproblem_ptr;
-  lmeds.threshold_ = 2.0*(1.0 - cos(atan(sqrt(2.0)*0.5/800.0)));
-  lmeds.max_iterations_ = 50;
-
-  //Run the experiment
-  gettimeofday( &tic, 0 );
-  lmeds.computeModel();
-  gettimeofday( &toc, 0 );
-  double lmeds_time = TIMETODOUBLE(timeval_minus(toc,tic));
-
-  //print results
-  std::cout << "the lmeds threshold is: " << lmeds.threshold_ << std::endl;
-  std::cout << "the lmeds results is: " << std::endl;
-  std::cout << lmeds.model_coefficients_ << std::endl << std::endl;
-  std::cout << "the normalized translation is: " << std::endl;
-  std::cout << lmeds.model_coefficients_.col(3)/
-      lmeds.model_coefficients_.col(3).norm() << std::endl << std::endl;
-  std::cout << "Lmeds needed " << lmeds.iterations_ << " iterations and ";
-  std::cout << lmeds_time << " seconds" << std::endl << std::endl;
-  std::cout << "the number of inliers is: " << lmeds.inliers_.size();
-  std::cout << std::endl << std::endl;
-  std::cout << "the found inliers are: " << std::endl;
-  for(size_t i = 0; i < lmeds.inliers_.size(); i++)
-    std::cout << lmeds.inliers_[i] << " ";
-  std::cout << std::endl << std::endl;
+//  auto A = opengv::trifocal::computeDesignMatrix(adapter,adapter);
+//  std::cout << "matrix A: " << std::endl;
+//  std::cout << A << std::endl;
+  trifocalTensor_t t;
+  t.setRandom();
+  std::cout << "vector t: " << std::endl;
+  std::cout << t << std::endl;
+  std::cout << "slice: " << std::endl;
+  std::cout << Eigen::Map<Matrix3d>(t.data()) << std::endl;
+  std::cout << Eigen::Map<Matrix3d>(t.data()+9) << std::endl;
 }
