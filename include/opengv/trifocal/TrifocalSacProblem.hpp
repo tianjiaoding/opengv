@@ -17,6 +17,7 @@ namespace sac_problems
 class TrifocalSacProblem :
   public sac::SampleConsensusProblem<trifocalModel_t>
 {
+public:
   typedef trifocalModel_t model_t;
   typedef opengv::relative_pose::RelativeAdapterBase adapter_t;
 

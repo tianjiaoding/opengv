@@ -448,6 +448,106 @@ opengv::generateRandom2D2DCorrespondences(
 }
 
 void
+opengv::generateRandom2D2D2DCorrespondences(
+  const translation_t & position1,
+  const rotation_t & rotation1,
+  const translation_t & position2,
+  const rotation_t & rotation2,
+  const translation_t & position3,
+  const rotation_t & rotation3,
+  const translations_t & camOffsets,
+  const rotations_t & camRotations,
+  size_t numberPoints,
+  double noise,
+  double outlierFraction,
+  bearingVectors_t & bearingVectors1,
+  bearingVectors_t & bearingVectors2,
+  bearingVectors_t & bearingVectors3,
+  Eigen::MatrixXd & gt )
+{
+  //initialize point-cloud
+  double minDepth = 4;
+  double maxDepth = 8;
+
+  for( size_t i = 0; i < (size_t) gt.cols(); i++ )
+    gt.col(i) = generateRandomPoint( maxDepth, minDepth );
+
+  //create the 2D3D-correspondences by looping through the cameras
+  size_t numberCams = camOffsets.size();
+  size_t camCorrespondence = 0;
+
+  for( size_t i = 0; i < (size_t) gt.cols(); i++ )
+  {
+    //get the camera transformation
+    translation_t camOffset = camOffsets[camCorrespondence];
+    rotation_t camRotation = camRotations[camCorrespondence];
+
+    //get the point in viewpoint 1
+    point_t bodyPoint1 = rotation1.transpose()*(gt.col(i) - position1);
+
+    //get the point in viewpoint 2
+    point_t bodyPoint2 = rotation2.transpose()*(gt.col(i) - position2);
+
+    //get the point in viewpoint 3
+    point_t bodyPoint3 = rotation3.transpose()*(gt.col(i) - position3);
+
+    //get the point in the camera in viewpoint 1
+    bearingVectors1.push_back(camRotation.transpose()*(bodyPoint1 - camOffset));
+
+    //get the point in the camera in viewpoint 2
+    bearingVectors2.push_back(camRotation.transpose()*(bodyPoint2 - camOffset));
+
+    //get the point in the camera in viewpoint 3
+    bearingVectors3.push_back(camRotation.transpose()*(bodyPoint3 - camOffset));
+
+    //normalize the bearing-vectors
+    bearingVectors1[i] = bearingVectors1[i] / bearingVectors1[i].norm();
+    bearingVectors2[i] = bearingVectors2[i] / bearingVectors2[i].norm();
+    bearingVectors3[i] = bearingVectors3[i] / bearingVectors3[i].norm();
+
+    //add noise
+    if( noise > 0.0 )
+    {
+      bearingVectors1[i] = addNoise(noise,bearingVectors1[i]);
+      bearingVectors2[i] = addNoise(noise,bearingVectors2[i]);
+      bearingVectors3[i] = addNoise(noise,bearingVectors3[i]);
+    }
+  }
+
+  //add outliers
+  size_t numberOutliers = (size_t) floor(outlierFraction*numberPoints);
+  for(size_t i = 0; i < numberOutliers; i++)
+  {
+    //get the corresponding camera transformation
+    translation_t camOffset = camOffsets[camCorrespondence];
+    rotation_t camRotation = camRotations[camCorrespondence];
+
+    //create random point
+    point_t p = generateRandomPoint(8,4);
+
+    //project this point into viewpoint 2
+    point_t bodyPoint2 = rotation2.transpose()*(p - position2);
+
+    //project this point into the corresponding camera in viewpoint 2
+    //and use as outlier
+    bearingVectors2[gt.cols()-i-1] = camRotation.transpose()*(bodyPoint2 - camOffset);
+
+    //normalize the bearing vector
+    bearingVectors2[gt.cols()-i-1] = bearingVectors2[gt.cols()-i-1] / bearingVectors2[gt.cols()-i-1].norm();
+
+    //project this point into viewpoint 3
+    point_t bodyPoint3 = rotation3.transpose()*(p - position3);
+
+    //project this point into the corresponding camera in viewpoint 3
+    //and use as outlier
+    bearingVectors3[gt.cols()-i-1] = camRotation.transpose()*(bodyPoint3 - camOffset);
+
+    //normalize the bearing vector
+    bearingVectors3[gt.cols()-i-1] = bearingVectors3[gt.cols()-i-1] / bearingVectors3[gt.cols()-i-1].norm();
+  }
+}
+
+void
 opengv::generateRandom3D3DCorrespondences(
     const translation_t & position1,
     const rotation_t & rotation1,

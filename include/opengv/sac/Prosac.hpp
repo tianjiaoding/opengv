@@ -92,6 +92,6 @@ namespace opengv {
     }
 }
 
-#include "opengv/sac/implementation/Prosac.hpp"
+#include "opengv/sac/implementation/prosac.hpp"
 
 #endif /* OPENGV_SAC_PROSAC_HPP_ */

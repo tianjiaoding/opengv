@@ -4,6 +4,8 @@
 
 #include <opengv/trifocal/methods.hpp>
 #include <Eigen/KroneckerProduct>
+#include <iostream>
+
 
 opengv::trifocal_design_t
 opengv::trifocal::computeDesignMatrix(
@@ -12,9 +14,8 @@ opengv::trifocal::computeDesignMatrix(
   const Indices &indices)
 {
   assert(adapter1.getNumberCorrespondences() == adapter2.getNumberCorrespondences());
-  size_t numCorrespondences = adapter1.getNumberCorrespondences();
-  trifocal_design_t A(27, 4*numCorrespondences);
-  for (size_t i=0; i< numCorrespondences; i++){
+  trifocal_design_t A(27, 4*indices.size());
+  for (size_t i=0; i< indices.size(); i++){
     auto ASlice = A.block<27,4>(0, i*4);
     opengv::trifocal::computeTrilinearEmbeddingsPPP(
       adapter1.getBearingVector1(indices[i]),
@@ -55,15 +56,15 @@ opengv::trifocal::computeTrilinearEmbeddingsPPP(
         const bearingVector_t & P3,
         Eigen::MatrixBase<derived> &M)
 {
-  double x1=P1(1);
-  double y1=P1(2);
-  double z1=P1(3);
-  double x2=P2(1);
-  double y2=P2(2);
-  double z2=P2(3);
-  double x3=P3(1);
-  double y3=P3(2);
-  double z3=P3(3);
+  double x1=P1(0);
+  double y1=P1(1);
+  double z1=P1(2);
+  double x2=P2(0);
+  double y2=P2(1);
+  double z2=P2(2);
+  double x3=P3(0);
+  double y3=P3(1);
+  double z3=P3(2);
 
   M.col(0) << x1*z2*z3,0,-x1*x2*z3, 0,0,0, -x1*z2*x3,0,x1*x2*x3,
           y1*z2*z3,0,-x2*y1*z3,  0,0,0, -x3*y1*z2,0,x2*x3*y1,
@@ -107,14 +108,15 @@ opengv::trifocal::algebraicMinimization(opengv::trifocalTensor_t t,
 
   //Find the least singular vector
   Eigen::Matrix3d V;
-  V.row(0) = computeLeastSingularVectorSmall(T1);
-  V.row(1) = computeLeastSingularVectorSmall(T2);
-  V.row(2) = computeLeastSingularVectorSmall(T3);
+  computeLeastSingularVectorSmall(T1);
+  V.row(0) = computeLeastSingularVectorSmall(T1).transpose();
+  V.row(1) = computeLeastSingularVectorSmall(T2).transpose();
+  V.row(2) = computeLeastSingularVectorSmall(T3).transpose();
   bearingVector_t epi31 = computeLeastSingularVectorSmall(V);
 
-  V.row(0) = computeLeastSingularVectorSmall(T1.transpose());
-  V.row(1) = computeLeastSingularVectorSmall(T2.transpose());
-  V.row(2) = computeLeastSingularVectorSmall(T3.transpose());
+  V.row(0) = computeLeastSingularVectorSmall(T1.transpose()).transpose();
+  V.row(1) = computeLeastSingularVectorSmall(T2.transpose()).transpose();
+  V.row(2) = computeLeastSingularVectorSmall(T3.transpose()).transpose();
   bearingVector_t epi21 = computeLeastSingularVectorSmall(V);
 
   Eigen::Matrix<double, 27, 9>  ELeft;

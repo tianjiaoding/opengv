@@ -4,6 +4,7 @@
 
 #include <opengv/trifocal/TrifocalSacProblem.hpp>
 #include <opengv/trifocal/methods.hpp>
+#include <iostream>
 
 bool opengv::sac_problems::
 TrifocalSacProblem::computeModelCoefficients(
@@ -16,19 +17,28 @@ TrifocalSacProblem::computeModelCoefficients(
 
   //Find the least singular vector
   Eigen::JacobiSVD< Eigen::MatrixXd > SVD(A, Eigen::ComputeFullU);
-  Eigen::Matrix<double,27,1> t = SVD.matrixU().col(27);
+  Eigen::Matrix<double,27,1> t = SVD.matrixU().col(26);
 
   outModel.t = t;
 
-  if (_targetModel == targetModel_t::VectorT)
+  if (_targetModel == targetModel_t::VectorR27)
   {
-    fprintf(stdout,"Model type: VectorT. Exiting from computeModelCoefficients.");
+    fprintf(stdout,"Model type: VectorR27. Exiting from computeModelCoefficients.");
     return true;
   }
 
   Eigen::Matrix<double,27,1> t_corrected =
           opengv::trifocal::algebraicMinimization(t, A);
   outModel.t_corrected = t_corrected;
+
+  std::cout << outModel.t.transpose() << std::endl;
+  std::cout << outModel.t_corrected.transpose() << std::endl;
+
+  if (_targetModel == targetModel_t::VectorT)
+  {
+    fprintf(stdout,"Model type: VectorT. Exiting from computeModelCoefficients.");
+    return true;
+  }
 
   fprintf(stdout,"Model more than corrected t is not implemented!");
 
@@ -47,17 +57,30 @@ TrifocalSacProblem::getSelectedDistancesToModel(
     {
       Eigen::VectorXd errors = opengv::trifocal::computeAlgebraicError(
               _designMatrix, model.t);
-      for (size_t i=0; i<scores.size(); i++)
+      for (size_t i=0; i<indices.size(); i++)
       {
-        scores[i] = errors[i];
+        scores.push_back(errors[indices[i]]);
       }
       break;
     }
     case TransferDist:
     {
-      
+      for (size_t i=0; i<indices.size(); i++)
+      {
+        scores.push_back(opengv::trifocal::computeTransferError(
+                model.t_corrected,
+                _adapter1.getBearingVector1(indices[i]),
+                _adapter1.getBearingVector2(indices[i]),
+                _adapter2.getBearingVector2(indices[i])));
+        std::cout << "scores[" << i << "]=" << scores[i] << std::endl;
+      }
+      break;
     }
-
+    default:
+    {
+      fprintf(stderr,"Other distances are not implemented!");
+      break;
+    }
   }
 }
 
@@ -71,5 +94,5 @@ TrifocalSacProblem::optimizeModelCoefficients(const std::vector<int> &inliers,
 
 int opengv::sac_problems::TrifocalSacProblem::getSampleSize() const
 {
-  return 0;
+  return 7;
 }

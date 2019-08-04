@@ -158,7 +158,7 @@ opengv::sac_problems::
       inverseTransformations.push_back(inverseTransformation);
     }
 
-    // collect qualities for each of the four solutions solution
+    // collect qualities for each of the four solutions
     Eigen::Matrix<double,4,1> p_hom;
     p_hom[3] = 1.0;
 
@@ -182,7 +182,7 @@ opengv::sac_problems::
         bearingVector_t f1 = _adapter.getBearingVector1(indices[k]);
         bearingVector_t f2 = _adapter.getBearingVector2(indices[k]);
 
-        // bearing-vector based outlier criterium (select threshold accordingly):
+        // bearing-vector based outlier criterion (select threshold accordingly):
         // 1-(f1'*f2) = 1-cos(alpha) \in [0:2]
         double reprojError1 = 1.0 - (f1.transpose() * reprojection1);
         double reprojError2 = 1.0 - (f2.transpose() * reprojection2);

@@ -122,6 +122,23 @@ void generateRandom2D2DCorrespondences(
     std::vector<int> & camCorrespondences2,
     Eigen::MatrixXd & gt );
 
+void generateRandom2D2D2DCorrespondences(
+    const translation_t & position1,
+    const rotation_t & rotation1,
+    const translation_t & position2,
+    const rotation_t & rotation2,
+    const translation_t & position3,
+    const rotation_t & rotation3,
+    const translations_t & camOffsets,
+    const rotations_t & camRotations,
+    size_t numberPoints,
+    double noise,
+    double outlierFraction,
+    bearingVectors_t & bearingVectors1,
+    bearingVectors_t & bearingVectors2,
+    bearingVectors_t & bearingVectors3,
+    Eigen::MatrixXd & gt );
+
 void generateRandom3D3DCorrespondences(
     const translation_t & position1,
     const rotation_t & rotation1,

@@ -32,6 +32,7 @@
 #include <functional>
 
 #include <ctime>
+#include <iostream>
 
 template<typename M>
 opengv::sac::SampleConsensusProblem<M>::SampleConsensusProblem(
